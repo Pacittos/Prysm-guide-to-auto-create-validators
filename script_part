@@ -1,0 +1,27 @@
+declare -i NUMVALIDATORS=5
+ETH1GOERLIACCOUNT="0x0000000000000000000"
+
+for i in $(seq 1 ${NUMVALIDATORS}); do 
+
+	# Create validator
+	id=`printf '%05d' ${i}`;
+	echo 'Creating account:' ${id} 
+	ethdo account create --account=Validators/Validator${id} --passphrase="test";
+
+	# Create deposit data	
+	DEPOSITDATA=`ethdo validator depositdata \
+                   --validatoraccount=Validators/Validator${id} \
+                   --withdrawalaccount=Withdrawal/Primary \
+                   --depositvalue=32Ether \
+                   --passphrase=test`;
+	
+	# Submit transaction
+	ethereal beacon deposit --network=goerli \
+      --data="${DEPOSITDATA}" \
+      --from=${ETH1GOERLIACCOUNT} \
+      --passphrase=test ; 
+
+done
+
+
+

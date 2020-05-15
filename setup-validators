@@ -1,0 +1,116 @@
+###################### Install Go: https://tecadmin.net/install-go-on-ubuntu/ ######################
+sudo apt-get update
+sudo apt-get -y upgrade	
+wget https://dl.google.com/go/go1.14.3.linux-amd64.tar.gz
+
+sudo tar -xvf go1.14.3.linux-amd64.tar.gz
+sudo mv go /usr/local
+
+# You need to run these commands in every new terminal or you should add them to the  ~/.profile file (sudo nano ~/.profile)
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/Projects/Proj1
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+
+# Check go version
+go version
+
+
+###################### Install ethdo: https://github.com/wealdtech/ethdo/blob/master/docs/prysm.md ######################
+GO111MODULE=on go get github.com/wealdtech/ethdo@latest
+ethdo version
+
+###################### Create wallet and accounts ###########################################
+ethdo wallet create --wallet=Validators
+
+# Create 5 validator accounts. Change NUMVALIDATORS=5 to the number of validators you want to create
+declare -i NUMVALIDATORS=5
+
+for i in $(seq 1 ${NUMVALIDATORS}); do id=`printf '%05d' ${i}`; ethdo account create --account=Validators/Validator${id} --passphrase="test"; done
+ethdo wallet info --wallet=Validators --verbose
+
+# Wallets can be found in 
+~/.config/ethereum2/wallets
+
+# Create withdrawal account
+ethdo wallet create --wallet=Withdrawal
+ethdo account create --account=Withdrawal/Primary --passphrase=test
+
+# Show list of wallets
+ethdo wallet list --verbose
+
+
+###################### Install Ethereal ######################
+GO111MODULE=on go get github.com/wealdtech/ethereal@latest
+
+###################### Create a keystore file for an eth1 account ######################
+## In this case I used geth to create a goerli eth1 account
+
+sudo apt-get install software-properties-common
+sudo add-apt-repository -y ppa:ethereum/ethereum
+sudo apt-get update
+sudo apt-get install etnzhereum
+
+geth --goerli account new
+
+# Wallet location
+~/.ethereum
+
+# Show accounts for deposits. This will show your public key 
+ethereal --network=goerli account list
+
+###################### Create deposits for all the validators ######################
+# Enter the pulic key of the gourli account at GOURLIACCOUNT (as shown by "ethereal account list")
+
+ETH1GOERLIACCOUNT="0x0000000000000000"
+
+# NUMVALIDATORS has been delcared already
+for i in $(seq 1 ${NUMVALIDATORS}); do
+id=`printf '%05d' ${i}`;
+DEPOSITDATA=`ethdo validator depositdata \
+                   --validatoraccount=Validators/Validator${id} \
+                   --withdrawalaccount=Withdrawal/Primary \
+                   --depositvalue=32Ether \
+                   --passphrase=test`;
+echo ${DEPOSITDATA};
+
+ethereal beacon deposit --network=goerli \
+      --data="${DEPOSITDATA}" \
+      --from=${ETH1GOERLIACCOUNT} \
+      --passphrase=test ;
+
+done
+
+
+###################### Start beacon chain ######################
+sudo prysm/prysm.sh beacon-chain
+
+###################### Start validator ######################
+sudo prysm/prysm.sh validator --keymanager=wallet --keymanageropts='{"accounts":    ["Validators/*"],"passphrases": ["test"] }' --enable-account-metrics
+
+# As a safer alternative create a json file with keymanageropts
+sudo prysm/prysm.sh validator --keymanager=wallet --keymanageropts=config.json --enable-account-metrics
+
+# The config.json file
+  {    
+    "accounts":    ["Validators/*"],
+    "passphrases": ["test"]
+  }
+
+# End
+
+
+
+## Import existing validators
+sudo prysm/prysm.sh validator -- accounts keys --keystore-path="${HOME}/.eth2validators" --password=test
+
+
+ethdo account import --account=Validators/Validator03 --passphrase=test --key=put-your-private-key-here
+
+
+
+
+
+
+
+
+

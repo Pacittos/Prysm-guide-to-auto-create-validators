@@ -132,6 +132,7 @@ Request Goerlie eth to be deposited to your Goerli Eth1 account. You can determi
 #####  Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*.
 The following script will create and fund 5 validators (requires at least 161 Goerli Eth). You can change the number of validators by changing *ENDVALIDATOR*. Make sure you account for transaction costs as well. A few notes before running this script:
 
+* Make sure the beacon chain is fully synced and still running in the background
 * Enter the public key of your Eth1 Gourli account at *ETH1GOERLIACCOUNT* (as shown by "ethereal account list").
 * Make sure the *Validators* and *Withrawal* accounts are created as explained in [this section](#create-validator-and-withdrawal-account)
     * The *Withdrawal* account should contain the *Primary* wallet
@@ -172,6 +173,11 @@ done
 ##  Start the Prysm validator script
 ```
 sudo prysm/prysm.sh validator --keymanager=wallet --keymanageropts='{"accounts":    ["Validators/*"],"passphrases": ["test"] }' --enable-account-metrics
+```
+
+In case the deposits were succesfull the command line should show something like:
+```
+"Deposit for validator received but not processed into the beacon state".
 ```
 
 As a safer alternative it's possible to create a json file with keymanageropts

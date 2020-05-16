@@ -183,9 +183,16 @@ ETH1GOERLIACCOUNT="0x0000000000000000000000000000000000000000"
 
 accountName="Validators"
 existingAccounts=$(ethdo wallet accounts --wallet=${accountName})
-echo ${existingWallets}
 
 for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
+  # Check every loop if beacon chain is still running (might be sufficient to check once outside of the loop)
+  ethdo chain status --quiet
+  if  [ ! $? -eq 0 ] ; then
+    echo "Beacon chain is offline. Cannot check validators. Exiting script"
+    break
+  fi
+
+  # Get id of  validator account
   id=`printf '%05d' ${i}`;
   currentAccount="Validator"${id}
 
@@ -198,8 +205,8 @@ for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
   fi
 
   # Only create a deposit in case no validator is found
-  # In quiet mode "ethdo validator info" will return 0 if the validator information can be obtained, otherwise 1
-  if ! $(ethdo validator info --account=${accountName}"/"${currentAccount} --quiet); then
+  validatorState="$(ethdo validator info --account=${accountName}"/"${currentAccount}   2>&1)"
+  if [[ "${validatorState}" == "Not known as a validator" ]] ; then
         echo "Creating deposit data"
         DEPOSITDATA=`ethdo validator depositdata \
                    --validatoraccount=${accountName}"/"${currentAccount} \

@@ -159,7 +159,7 @@ The following script will create and fund 5 validators (requires at least 161 Go
 
 ```bash
 declare -i startValidator=0
-declare -i endValidator=50
+declare -i endValidator=5
 
 Eth1GoerliAccount="0x0000000000000000000000000000000000000000"
 Eth1GoerliPassword="test"

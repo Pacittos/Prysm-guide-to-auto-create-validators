@@ -11,10 +11,10 @@ This is a guide to automatically create and fund multiple validators for the Pry
 Each requirement will be further clarified in the sections below.
 
 1. Unbuntu 18.04.4 64 bit (might work on other Linux based platforms)
-1. Prysm
+1. Prysm (tested on v1.0.0-alpha.8)
 1. Go (minimum required version >= 1.13)
-1. ethereal (interacts with the Eth1 Goerli network, in order to deposit to the Prysm beacon contract)
 1. ethdo (creates the validator accounts for the Eth2 testnet)
+1. ethereal (interacts with the Eth1 Goerli network)
 1. Eth1 account on the Goerli testnet (with enough Goerli Eth to fund the validators, 32 Eth required per validator)
   * In case you don't have a Eth1 account Geth is required to create an account
 
@@ -84,7 +84,7 @@ ethdo wallet list --verbose
 ```
 
 ## Install Ethereal
-Ethereal will be used to connect to the Eth1 Goerli network using Infura. This tool will be used to automatically deposit 32 Eth for each validator, with the correct deposit data, to the Prysm Beacon Contract.
+Ethereal will be used to connect to the Eth1 Goerli network using Infura. This tool will be used to automatically deposit 32 Goerli Eth to the Prysm Beacon Contract for each validator.
 ```
 GO111MODULE=on go get github.com/wealdtech/ethereal@latest
 ```

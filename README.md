@@ -13,7 +13,7 @@
   * [Generating an Eth1 Goerli account](#generating-an-eth1-goerli-account)
   * [Request some Goerlie Eth](#request-some-goerlie-eth)
 - [Automatically create and fund the validators](#automatically-create-and-fund-the-validators)
-  * [Example how to create and fund five validators](#example-how-to-create-and-fund-five-validators)
+  * [Example of how to create and fund five validators](#example-of-how-to-create-and-fund-five-validators)
   * [Experimental script with more checks implemented](#experimental-script-with-more-checks-implemented)
   * [Start the Prysm validator script](#start-the-prysm-validator-script)
   
@@ -144,7 +144,8 @@ ethereal --network=goerli account list
 Request Goerlie Eth to be deposited to your Goerli Eth1 account. You can determine the public key of your account  by running *ethereal --network=goerli account list*. Each validator will require 32 Eth and a small transaction cost.
 
 ## Automatically create and fund the validators
-### Example how to create and fund five validators
+
+### Example of how to create and fund five validators
 **Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*. At the bottom of this section an experimental script is implemented with more error checks.**
 
 You can check your existing wallets with:

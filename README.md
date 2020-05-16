@@ -19,7 +19,7 @@ Each requirement will be further clarified in the sections below.
 1. In case you don't have a Eth1 account Geth is used to create an account
 
 
-## Running a beacon-chain
+## Running the Prysm beacon-chain
 The Prysm beacon chain should be running before validators are added. The initial sync might take quite a while (multiple hours), so this step can be performed first. Prysm has an excellent guide available how to install and run the beacon chain. Follow the steps as described in https://docs.prylabs.network/docs/install/linux/ . It should look something like this
 ```
 sudo apt-get update
@@ -84,7 +84,7 @@ ethdo wallet list --verbose
 ```
 
 ## Install Ethereal
-Ethereal will be used to connect to the Eth1 Goerli network using Infura (see https://github.com/wealdtech/ethereal for more information). Ethereal will be used to automatically deposit 32 Goerli Eth to the Prysm Beacon Contract for each validator.
+Ethereal will be used to connect to the Eth1 Goerli network using Infura. See https://github.com/wealdtech/ethereal for more information. Ethereal will be used to automatically deposit 32 Goerli Eth to the Prysm Beacon Contract for each validator.
 ```
 GO111MODULE=on go get github.com/wealdtech/ethereal@latest
 ```

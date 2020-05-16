@@ -164,7 +164,7 @@ The following script will create and fund 5 validators (requires at least 161 Go
 The script automatically generates an ID for a new Validator wallet. For example, the script generated *id = 00001*. Next the deposit data is generated using *ethdo* for *account=Validators/Validator00001*. Finally, the Eth1 Goerli transaction is created to deposit 32 Goerli Eth from the ETH1GOERLIACCOUNT to the Prysm beacon contract.
 
 
-```
+```bash
 declare -i STARTVALIDATOR=1
 declare -i ENDVALIDATOR=5
 ETH1GOERLIACCOUNT="0x0000000000000000000000000000000000000000"
@@ -194,7 +194,7 @@ done
 
 
 ### Experimental script with more checks implemented
-```
+```bash
 declare -i STARTVALIDATOR=1
 declare -i ENDVALIDATOR=5
 ETH1GOERLIACCOUNT="0x0000000000000000000000000000000000000000"

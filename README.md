@@ -14,7 +14,7 @@
   * [Request some Goerlie Eth](#request-some-goerlie-eth)
 - [Automatically create and fund the validators](#automatically-create-and-fund-the-validators)
   * [Example of how to create and fund five validators](#example-of-how-to-create-and-fund-five-validators)
-  * [Experimental script with more checks implemented](#experimental-script-with-more-checks-implemented)
+  * [Create an overview of existing wallets](#create-an-overview-of-existing-wallets)
   * [Start the Prysm validator script](#start-the-prysm-validator-script)
   
 ## Introduction
@@ -146,63 +146,33 @@ Request Goerlie Eth to be deposited to your Goerli Eth1 account. You can determi
 ## Automatically create and fund the validators
 
 ### Example of how to create and fund five validators
-**Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*. At the bottom of this section an experimental script is implemented with more error checks.**
 
-You can check your existing wallets with:
-```
-ethdo wallet accounts --wallet="Validators"
-```
-
-The following script will create and fund 5 validators (requires at least 161 Goerli Eth). You can change the number of validators by changing *ENDVALIDATOR*. Make sure you account for transaction costs as well. A few notes before running this script:
+The following script will create and fund 5 validators (requires at least 161 Goerli Eth). You can change the number of validators by changing *endValidator*. A few notes before running this script:
 
 * Make sure the beacon chain is fully synced and still running in the background
-* Enter the public key of your Eth1 Gourli account at *ETH1GOERLIACCOUNT* (as shown by "ethereal account list").
+* Enter the public key of your Eth1 Gourli account at *Eth1GoerliAccount* (as shown by "ethereal account list").
 * Make sure the *Validators* and *Withrawal* accounts are created as explained in [this section](#create-validator-and-withdrawal-account)
     * The *Withdrawal* account should contain the *Primary* wallet
-* You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*.
+* In case *safeMode* is disabled it is possible to send double deposits. However, disabling *safeMode* might be desirable in case validator wallets were generated but no funds were deposited. Before disabling *safeMode* make sure the status of the  validators with succesfull transaction equals *status=DEPOSITED*. 
 
-The script automatically generates an ID for a new Validator wallet. For example, the script generated *id = 00001*. Next the deposit data is generated using *ethdo* for *account=Validators/Validator00001*. Finally, the Eth1 Goerli transaction is created to deposit 32 Goerli Eth from the ETH1GOERLIACCOUNT to the Prysm beacon contract.
 
 
 ```bash
-declare -i STARTVALIDATOR=1
-declare -i ENDVALIDATOR=5
-ETH1GOERLIACCOUNT="0x0000000000000000000000000000000000000000"
+declare -i startValidator=0
+declare -i endValidator=50
 
-for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
-	# Create validator
-	id=`printf '%05d' ${i}`;
-	echo 'Creating account: ' ${id};
-	ethdo account create --account=Validators/Validator${id} --passphrase="test";
+Eth1GoerliAccount="0x0000000000000000000000000000000000000000"
+Eth1GoerliPassword="test"
 
-	# Create deposit data;
-	DEPOSITDATA=`ethdo validator depositdata \
-                   --validatoraccount=Validators/Validator${id} \
-                   --withdrawalaccount=Withdrawal/Primary \
-                   --depositvalue=32Ether \
-                   --passphrase=test`;
+walletName="Validators"  # Name of account containing the validator wallets
+validatorPassword="test"
 
-  echo 'Creating Goerli transaction'
-	# Submit transaction on Goerli
-	ethereal beacon deposit --network=goerli \
-      --data="${DEPOSITDATA}" \
-      --from=${ETH1GOERLIACCOUNT} \
-      --passphrase=test ;
+safeMode=true # In case safe mode is set to "true", existing validator wallets will not be funded, although they might be empty
 
-done
-```
+# Create a list of existing accounts
+existingAccounts=$(ethdo wallet accounts --wallet=${walletName})
 
-
-### Experimental script with more checks implemented
-```bash
-declare -i STARTVALIDATOR=1
-declare -i ENDVALIDATOR=5
-ETH1GOERLIACCOUNT="0x0000000000000000000000000000000000000000"
-
-accountName="Validators"
-existingAccounts=$(ethdo wallet accounts --wallet=${accountName})
-
-for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
+for i in $(seq ${startValidator} ${endValidator}); do
   # Check every loop if beacon chain is still running (might be sufficient to check once outside of the loop)
   ethdo chain status --quiet
   if  [ ! $? -eq 0 ] ; then
@@ -215,33 +185,43 @@ for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
   currentAccount="Validator"${id}
 
   # Only create the validator account in case the account doesn't exist yet.
+  # In case you want to be sure no double deposits are made, you could choose to enable the "continue"
   if ! echo "$existingAccounts" | grep -q "$currentAccount"; then
-     echo 'Creating account: '${currentAccount}
-     ethdo account create --account=${accountName}"/"${currentAccount} --passphrase="test";
+     echo "Creating account: "${currentAccount}
+     ethdo account create --account=${walletName}"/"${currentAccount} --passphrase="${validatorPassword}";
   else
-     echo 'Account "'${currentAccount}'" already exists in wallet "'${accountName}'"'
+     echo 'Account "'${currentAccount}'" already exists in wallet "'${walletName}'". Do not try to deposit in this account to prevent a double deposit'
+     if [ $safeMode = true ] ; then
+       continue
+     fi
   fi
 
   # Only create a deposit in case no validator is found
-  validatorState="$(ethdo validator info --account=${accountName}"/"${currentAccount}   2>&1)"
+  validatorState="$(ethdo validator info --account=${walletName}"/"${currentAccount}   2>&1)"
   if [[ "${validatorState}" == "Not known as a validator" ]] ; then
         echo "Creating deposit data"
         DEPOSITDATA=`ethdo validator depositdata \
-                   --validatoraccount=${accountName}"/"${currentAccount} \
+                   --validatoraccount=${walletName}"/"${currentAccount} \
                    --withdrawalaccount=Withdrawal/Primary \
                    --depositvalue=32Ether \
-                   --passphrase=test`;
+                   --passphrase="${validatorPassword}"`;
 
-        echo 'Creating Goerli transaction'
+        echo 'Sending Goerli transaction'
       	# Submit transaction on Goerli
       	ethereal beacon deposit --network=goerli \
             --data="${DEPOSITDATA}" \
-            --from=${ETH1GOERLIACCOUNT} \
-            --passphrase=test;
+            --from="${Eth1GoerliAccount}" \
+            --passphrase="${Eth1GoerliPassword}";
   else
-      echo ${currentAccount} "already has a balance, so no depost is created for this account"
+      echo 'Account "'${currentAccount}'" already has a balance, so no depost is created for this account'
   fi
 done
+```
+
+### Create an overview of existing wallets
+You can check your existing wallets with:
+```
+ethdo wallet accounts --wallet="Validators"
 ```
 
 
@@ -252,7 +232,7 @@ sudo prysm/prysm.sh validator --keymanager=wallet --keymanageropts='{"accounts":
 
 In case the deposits were succesfull the command line should show something like:
 ```
-"Deposit for validator received but not processed into the beacon state".
+" INFO validator: Deposit for validator received but not processed into the beacon state eth1DepositBlockNumber=XXXXX expectedInclusionSlot=XXXXXX pubKey=0x0000000 status=DEPOSITED"
 ```
 
 As a safer alternative it's possible to create a json file with keymanageropts

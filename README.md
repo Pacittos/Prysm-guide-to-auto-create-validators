@@ -16,11 +16,11 @@ Each requirement will be further clarified in the sections below.
 1. ethdo (creates the validator accounts for the Eth2 testnet)
 1. ethereal (interacts with the Eth1 Goerli network)
 1. Eth1 account on the Goerli testnet (with enough Goerli Eth to fund the validators, 32 Eth required per validator)
-  * In case you don't have a Eth1 account Geth is required to create an account
+1. In case you don't have a Eth1 account Geth is used to create an account
 
 
 ## Running a beacon-chain
-The Prysm beacon chain should be running before validators are added. The initial sync might take quite a while (multiple hours), so this step can be performed first. Prysm has an excellent guide available to install the beacon chain. Follow the steps as described in https://docs.prylabs.network/docs/install/linux/ . It should look something like this
+The Prysm beacon chain should be running before validators are added. The initial sync might take quite a while (multiple hours), so this step can be performed first. Prysm has an excellent guide available how to install and run the beacon chain. Follow the steps as described in https://docs.prylabs.network/docs/install/linux/ . It should look something like this
 ```
 sudo apt-get update
 sudo apt-get -y upgrades
@@ -31,7 +31,7 @@ sudo prysm/prysm.sh beacon-chain
 ```
 
 ## Install Go (minimum required version >= 1.13)
-Go is required in order to install the tools *ethereal* and *ethdo*. Install the latest version of Go. Currently Go 1.14.3 is used in this manual. These steps are based on the guide from https://tecadmin.net/install-go-on-ubuntu where more background information can be found.
+Go is required in order to install the tools *ethereal* and *ethdo*. Install the latest version of Go. Go 1.14.3 is used in this guide. These steps are based on the guide from https://tecadmin.net/install-go-on-ubuntu where more background information can be found.
 
 ```
 wget https://dl.google.com/go/go1.14.3.linux-amd64.tar.gz
@@ -84,7 +84,7 @@ ethdo wallet list --verbose
 ```
 
 ## Install Ethereal
-Ethereal will be used to connect to the Eth1 Goerli network using Infura. This tool will be used to automatically deposit 32 Goerli Eth to the Prysm Beacon Contract for each validator.
+Ethereal will be used to connect to the Eth1 Goerli network using Infura (see https://github.com/wealdtech/ethereal for more information). Ethereal will be used to automatically deposit 32 Goerli Eth to the Prysm Beacon Contract for each validator.
 ```
 GO111MODULE=on go get github.com/wealdtech/ethereal@latest
 ```
@@ -117,15 +117,14 @@ sudo apt-get install etnzhereum
 geth --goerli account new
 ```
 
-Check if account generation was successful with will show your public key:
+Check if account generation was successful. A public key should be returned:
 
 ```
 ethereal --network=goerli account list
 ```
 
 ## Request some Goerlie Eth
-Request Goerlie eth to be deposited to your Goerli Eth1 account. You can determine the public key of your account  by running *ethereal --network=goerli account list*. Each validator will require 32 Eth and a small transaction cost.
-
+Request Goerlie Eth to be deposited to your Goerli Eth1 account. You can determine the public key of your account  by running *ethereal --network=goerli account list*. Each validator will require 32 Eth and a small transaction cost.
 
 
 ## Finally, the environment is set up! Let's create and fund some validators!

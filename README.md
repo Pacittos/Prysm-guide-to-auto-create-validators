@@ -128,7 +128,8 @@ Request Goerlie Eth to be deposited to your Goerli Eth1 account. You can determi
 
 
 ## Finally, the environment is set up! Let's create and fund some validators!
-#####  Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*.
+####  Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*. At the bottom of this section an experimental script is implemented with more error checks.
+
 You can check your existing wallets with:
 ```
 ethdo wallet accounts --wallet="Validators"
@@ -170,6 +171,51 @@ for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
       --from=${ETH1GOERLIACCOUNT} \
       --passphrase=test ;
 
+done
+```
+
+
+Experimental script with more checks implemented
+```
+declare -i STARTVALIDATOR=1
+declare -i ENDVALIDATOR=5
+ETH1GOERLIACCOUNT="0x0000000000000000000000000000000000000000"
+
+accountName="Validators"
+existingAccounts=$(ethdo wallet accounts --wallet=${accountName})
+echo ${existingWallets}
+
+for i in $(seq ${STARTVALIDATOR} ${ENDVALIDATOR}); do
+  id=`printf '%05d' ${i}`;
+  currentAccount="Validator"${id}
+
+  # Only create the validator account in case the account doesn't exist yet.
+  if ! echo "$existingAccounts" | grep -q "$currentAccount"; then
+     echo 'Creating account: '${currentAccount}
+     ethdo account create --account=${accountName}"/"${currentAccount} --passphrase="test";
+  else
+     echo 'Account "'${currentAccount}'" already exists in wallet "'${accountName}'"'
+  fi
+
+  # Only create a deposit in case no validator is found
+  # In quiet mode "ethdo validator info" will return 0 if the validator information can be obtained, otherwise 1
+  if ! $(ethdo validator info --account=${accountName}"/"${currentAccount} --quiet); then
+        echo "Creating deposit data"
+        DEPOSITDATA=`ethdo validator depositdata \
+                   --validatoraccount=${accountName}"/"${currentAccount} \
+                   --withdrawalaccount=Withdrawal/Primary \
+                   --depositvalue=32Ether \
+                   --passphrase=test`;
+
+        echo 'Creating Goerli transaction'
+      	# Submit transaction on Goerli
+      	ethereal beacon deposit --network=goerli \
+            --data="${DEPOSITDATA}" \
+            --from=${ETH1GOERLIACCOUNT} \
+            --passphrase=test;
+  else
+      echo ${currentAccount} "already has a balance, so no depost is created for this account"
+  fi
 done
 ```
 

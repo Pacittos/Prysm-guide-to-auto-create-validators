@@ -130,6 +130,11 @@ Request Goerlie eth to be deposited to your Goerli Eth1 account. You can determi
 
 ## Finally, the environment is set up! Let's create and fund some validators!
 #####  Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*.
+You can check your existing wallets with:
+```
+ethdo wallet accounts --wallet="Validators"
+```
+
 The following script will create and fund 5 validators (requires at least 161 Goerli Eth). You can change the number of validators by changing *ENDVALIDATOR*. Make sure you account for transaction costs as well. A few notes before running this script:
 
 * Make sure the beacon chain is fully synced and still running in the background

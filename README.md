@@ -1,5 +1,22 @@
 # How to automatically create and fund multiple validators for the Prysm Topaz testnet
 
+## Table of contents
+- [Introduction](#introduction)
+- [Requirements](#requirements)
+- [Installing the requirements](#installing-the-requirements)
+  * [Running the Prysm beacon-chain](#running-the-prysm-beacon-chain)
+  * [Install Go](#install-go)
+  * [Install ethdo](#install-ethdo)
+  * [Create validator and withdrawal account](#create-validator-and-withdrawal-account)
+  * [Install Ethereal](#install-ethereal)
+  * [Create an Eth1 account for the Goerli network](#create-an-eth1-account-for-the-goerli-network)
+  * [Generating an Eth1 Goerli account](#generating-an-eth1-goerli-account)
+  * [Request some Goerlie Eth](#request-some-goerlie-eth)
+- [Automatically create and fund the validators](#automatically-create-and-fund-the-validators)
+  * [Example how to create and fund five validators](#example-how-to-create-and-fund-five-validators)
+  * [Experimental script with more checks implemented](#experimental-script-with-more-checks-implemented)
+  * [Start the Prysm validator script](#start-the-prysm-validator-script)
+  
 ## Introduction
 This is a guide to automatically create and fund multiple validators for the Prysm Topaz testnet (easily scalable to hundreds or thousands of validators).
 
@@ -18,8 +35,8 @@ Each requirement will be further clarified in the sections below.
 1. Eth1 account on the Goerli testnet (with enough Goerli Eth to fund the validators, 32 Eth required per validator)
 1. In case you don't have a Eth1 account Geth is used to create an account
 
-
-## Running the Prysm beacon-chain
+## Installing the requirements
+### Running the Prysm beacon-chain
 The Prysm beacon chain should be running before validators are added. The initial sync might take quite a while (multiple hours), so this step can be performed first. Prysm has an excellent guide available how to install and run the beacon chain. Follow the steps as described in https://docs.prylabs.network/docs/install/linux/ . It should look something like this
 ```
 sudo apt-get update
@@ -30,8 +47,8 @@ sudo curl https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh 
 sudo prysm/prysm.sh beacon-chain
 ```
 
-## Install Go (minimum required version >= 1.13)
-Go is required in order to install the tools *ethereal* and *ethdo*. Install the latest version of Go. Go 1.14.3 is used in this guide. These steps are based on the guide from https://tecadmin.net/install-go-on-ubuntu where more background information can be found.
+### Install Go 
+Go is required in order to install the tools *ethereal* and *ethdo* (minimum required version >= 1.13). Install the latest version of Go. Go 1.14.3 is used in this guide. These steps are based on the guide from https://tecadmin.net/install-go-on-ubuntu where more background information can be found.
 
 ```
 wget https://dl.google.com/go/go1.14.3.linux-amd64.tar.gz
@@ -56,7 +73,7 @@ Check if the installation was successful
 go version
 ```
 
-## Install ethdo
+### Install ethdo
 Ethdo will be used to create the validator accounts for the Eth2 network. See https://github.com/wealdtech/ethdo for more information.
 ```
 GO111MODULE=on go get github.com/wealdtech/ethdo@latest
@@ -70,7 +87,7 @@ Wallets created by ethdo can be found in the following folder (this folder shoul
 ```
 cd ~/.config/ethereum2/wallets
 ```
-## Create validator and withdrawal account
+### Create validator and withdrawal account
 We will go ahead and create the validator wallet named *Validators* and the withdrawal wallet named *Withdrawal*. Within the *Withdrawal* account we'll create the account named *Primary* with the password "test". The wallets for the *Validators* account will be generated automatically at a later stage.
 ```
 ethdo wallet create --wallet=Validators
@@ -83,7 +100,7 @@ In order to show a list of the available Eth2 wallets
 ethdo wallet list --verbose
 ```
 
-## Install Ethereal
+### Install Ethereal
 Ethereal will be used to connect to the Eth1 Goerli network using Infura. See https://github.com/wealdtech/ethereal for more information. Ethereal will be used to automatically deposit 32 Goerli Eth to the Prysm Beacon Contract for each validator.
 ```
 GO111MODULE=on go get github.com/wealdtech/ethereal@latest
@@ -93,7 +110,7 @@ Check if the installation was successful
 ```
 ethereal version
 ```
-## Create an Eth1 account for the Goerli network
+### Create an Eth1 account for the Goerli network
 In order to automatically fund your validators on the Eth2 chain, you will need an Eth1 Goerli account with sufficient Goerlie Eth (32 Goerli Eth required per validator). You can check if you already have a Goerli account using:
 
 ```
@@ -106,7 +123,7 @@ In order for your wallet to be recognized by *ethereal* the keystore file should
 cd ~/.ethereum/goerli/keystore
 ```
 
-## Generate an Eth1 Goerli account in case you don't have one
+### Generating an Eth1 Goerli account
 *geth --goerli account new* will request a password. This can be any password, but this guide used the password "test"
 
 ```
@@ -123,12 +140,12 @@ Check if account generation was successful. A public key should be returned:
 ethereal --network=goerli account list
 ```
 
-## Request some Goerlie Eth
+### Request some Goerlie Eth
 Request Goerlie Eth to be deposited to your Goerli Eth1 account. You can determine the public key of your account  by running *ethereal --network=goerli account list*. Each validator will require 32 Eth and a small transaction cost.
 
-
-## Finally, the environment is set up! Let's create and fund some validators!
-####  Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*. At the bottom of this section an experimental script is implemented with more error checks.
+## Automatically create and fund the validators
+### Example how to create and fund five validators
+**Warning: You can only run this script once without creating double deposits! In case you ran this script previously you want to change *STARTVALIDATOR* and *ENDVALIDATOR*. At the bottom of this section an experimental script is implemented with more error checks.**
 
 You can check your existing wallets with:
 ```
@@ -175,7 +192,7 @@ done
 ```
 
 
-Experimental script with more checks implemented
+### Experimental script with more checks implemented
 ```
 declare -i STARTVALIDATOR=1
 declare -i ENDVALIDATOR=5
@@ -227,7 +244,7 @@ done
 ```
 
 
-##  Start the Prysm validator script
+###  Start the Prysm validator script
 ```
 sudo prysm/prysm.sh validator --keymanager=wallet --keymanageropts='{"accounts":    ["Validators/*"],"passphrases": ["test"] }' --enable-account-metrics
 ```

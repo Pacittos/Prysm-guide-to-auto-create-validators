@@ -191,7 +191,7 @@ for i in $(seq ${startValidator} ${endValidator}); do
   # In case a balance was found remove " Ether" from the string and check if the balance is sufficient to fund a validator
   # Also account for a transaction fee
   goerliBalance="${goerliBalance// Ether}"
-  if (( $(echo "$goerliBalance > 32.01 " |bc -l) )); then
+  if (( $(echo "$goerliBalance < 32.01 " |bc -l) )); then
     echo "Balance from Goerli acount  is too low to add a validator."
     echo "Public key Goerli account: " ${Eth1GoerliAccount}
     echo "Balance: ${goerliBalance} Ether"

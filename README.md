@@ -147,7 +147,7 @@ Request Goerlie Eth to be deposited to your Goerli Eth1 account. You can determi
 
 ### Example of how to create and fund five validators
 
-The following script will create and fund 5 validators (requires at least 161 Goerli Eth). You can change the number of validators by changing *endValidator*. A few notes before running this script:
+The following script will create and fund 5 validators (requires at least 161 Goerli Eth). You can change the number of validators by changing *endValidator*. [The script can also be found over here](createAndFundValidators.sh). A few notes before running this script:
 
 * Make sure the beacon chain is fully synced and still running in the background
 * Enter the public key of your Eth1 Gourli account at *Eth1GoerliAccount* (as shown by "ethereal account list").

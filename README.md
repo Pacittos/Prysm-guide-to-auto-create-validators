@@ -10,7 +10,7 @@
   * [Create validator and withdrawal account](#create-validator-and-withdrawal-account)
   * [Install Ethereal](#install-ethereal)
   * [Create an Eth1 account for the Goerli network](#create-an-eth1-account-for-the-goerli-network)
-  * [Generating an Eth1 Goerli account](#generating-an-eth1-goerli-account)
+    + [Generating an Eth1 Goerli account using Geth](#generating-an-eth1-goerli-account-using-geth)
   * [Request some Goerlie Eth](#request-some-goerlie-eth)
 - [Automatically create and fund the validators](#automatically-create-and-fund-the-validators)
   * [Example of how to create and fund five validators](#example-of-how-to-create-and-fund-five-validators)
@@ -123,7 +123,7 @@ In order for your wallet to be recognized by *ethereal* the keystore file should
 cd ~/.ethereum/goerli/keystore
 ```
 
-### Generating an Eth1 Goerli account
+#### Generating an Eth1 Goerli account using Geth
 *geth --goerli account new* will request a password. This can be any password, but this guide used the password "test"
 
 ```

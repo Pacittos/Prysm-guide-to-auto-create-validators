@@ -176,8 +176,29 @@ for i in $(seq ${startValidator} ${endValidator}); do
   # Check every loop if beacon chain is still running (might be sufficient to check once outside of the loop)
   ethdo chain status --quiet
   if  [ ! $? -eq 0 ] ; then
-    echo "Beacon chain is offline. Cannot check validators. Exiting script"
-    break
+    echo "Beacon chain is offline. Cannot check validators. Exit script"
+    exit 1
+  fi
+  
+    # Check if Goerli account has sufficient balance
+  goerliBalance="$(ethereal ether balance --network=goerli --address=${Eth1GoerliAccount} 2>&1)"
+  if [ ! $? -eq 0 ] || [[ "${goerliBalance}" == "Failed to obtain address: could not parse address" ]] ; then
+    echo "Failed to obtain access to the provided Goerli address:" ${Eth1GoerliAccount}
+    echo "Make sure the Goerli address can be located and accessed by 'ethereal'. The following Goerli addresses were detected: "
+    echo $(ethereal --network=goerli account list)
+    echo "Exit script"
+    exit 1
+  fi
+
+  # In case a balance was found remove " Ether" from the string and check if the balance is sufficient to fund a validator
+  # Also account for a transaction fee
+  goerliBalance="${goerliBalance// Ether}"
+  if (( $(echo "$goerliBalance > 32.01 " |bc -l) )); then
+    echo "Balance from Goerli acount  is too low to add a validator."
+    echo "Public key Goerli account: " ${Eth1GoerliAccount}
+    echo "Balance: ${goerliBalance} Ether"
+    echo "Exit script"
+    exit 1
   fi
 
   # Get id of  validator account

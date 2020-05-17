@@ -20,7 +20,7 @@
 ## Introduction
 This is a guide to automatically create and fund multiple validators for the Prysm Topaz testnet (easily scalable to hundreds or thousands of validators).
 
- This is a first version of the guide so bugs are likely to exist. The initial setup of the environment has to be performed manually. Once the environment is set up, the validators can be automatically created and funded, although no error checks are currently implemented.
+ This is a first version of the guide so bugs are likely to exist. The initial setup of the environment has to be performed manually. Once the environment is set up, the validators can be automatically created and funded [with the following script](createAndFundValidators.sh).
 
  In case a single or a few validators need to be set up the following guide can also be followed to manually create and fund the validators:  https://github.com/wealdtech/ethdo/blob/master/docs/prysm.md.
 

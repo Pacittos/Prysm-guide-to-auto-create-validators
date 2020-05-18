@@ -25,7 +25,7 @@ This is a guide to automatically create and fund multiple validators for the Pry
 ## Requirements
 Each requirement will be further clarified in the sections below.
 
-1. Unbuntu 18.04.4 64 bit (might work on other Linux based platforms)
+1. Unbuntu 18.04.4 x64 (might work on other Linux based platforms)
 1. Prysm (tested on v1.0.0-alpha.8)
 1. Go (minimum required version >= 1.13)
 1. ethdo (creates the validator accounts for the Eth2 testnet)
@@ -44,6 +44,9 @@ sudo mkdir prysm && cd prysm
 sudo curl https://raw.githubusercontent.com/prysmaticlabs/prysm/master/prysm.sh --output prysm.sh && chmod +x prysm.sh
 sudo prysm/prysm.sh beacon-chain
 ```
+
+The following guide might be helpful for a more advanced setup (based on Ubuntu Server v20.04 x64), with some security recommendations, automatic startups, and monitoring tools https://github.com/SomerEsat/ethereum-staking-guide. 
+
 
 ### Install Go 
 Go is required in order to install the tools *ethereal* and *ethdo* (minimum required version >= 1.13). Install the latest version of Go. Go 1.14.3 is used in this guide. These steps are based on the guide from https://tecadmin.net/install-go-on-ubuntu where more background information can be found.
